@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container mt-5">
+        <!-- Navbar with Login/Register -->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-sm">
+            <div class="container">
+                <a class="navbar-brand fw-bold" href="{% url 'todo:index' %}">Taskly</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                    <ul class="navbar-nav">
+                        {% if user.is_authenticated %}
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-white" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Welcome, {{ user.username }}!
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li>
+                                        <form method="POST" action="{% url 'todo:logout' %}" class="m-0">
+                                            {% csrf_token %}
+                                            <button type="submit" class="dropdown-item text-danger">Logout</button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </li>
+                        {% else %}
+                            <li class="nav-item">
+                                <a href="{% url 'todo:login' %}" class="btn btn-outline-light btn-sm me-2">Login</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{% url 'todo:register' %}" class="btn btn-light btn-sm text-primary">Register</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <h1 class="text-center mb-4 test">Taskly</h1>
+
+        <!-- Add Task Form -->
+        <div class="card p-4 mb-4 shadow">
+            <h4 class="mb-3">Add a New Task</h4>
+            <form method="POST" class="row g-3">
+                {% csrf_token %}
+                
+                <div class="col-md-6">
+                    <label class="form-label">{{ form.title.label }}</label>
+                    {{ form.title }}
+                </div>
+            
+                <div class="col-md-6">
+                    <label class="form-label d-block">{{ form.completed.label }}</label>
+                    <div class="form-check">
+                        {{ form.completed }}
+                        <label class="form-check-label">Mark as Completed</label>
+                    </div>
+                </div>
+            
+                <div class="col-12">
+                    <label class="form-label">{{ form.content.label }}</label>
+                    {{ form.content }}
+                </div>
+            
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">Add Task</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Task List -->
+        <div class="row">
+            {% for t in tasks %}
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ t.title }}</h5>
+                            <p class="card-text">{{ t.content }}</p>
+                            <p class="text-muted">Date: {{ t.date }} | Time: {{ t.time }}</p>
+                            <p>Status: 
+                                {% if t.completed %}
+                                    <span class="badge bg-success">Completed</span>
+                                {% else %}
+                                    <span class="badge bg-warning">Pending</span>
+                                {% endif %}
+                            </p>
+                            
+                            <a href="{% url 'todo:updateTask' t.id %}" class="btn btn-sm btn-outline-success">Update</a>
+
+                            <form action="{% url 'todo:deleteTask' t.id %}" method="POST" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+             
+            {% empty %}
+                <p class="text-center text-muted">No tasks available.</p>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
